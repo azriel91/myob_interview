@@ -5,5 +5,9 @@ authors = ["Azriel Hoh <azriel91@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+tokio = { version = "0.2.21", features = ["fs", "macros", "rt-core"] }
 warp = "0.2.3"
-tokio = { version = "0.2.21", features = ["macros", "rt-core"] }
+
+[dev-dependencies]
+bytes = "0.5.4"
+tempfile = "3.1.0"
