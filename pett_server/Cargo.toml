@@ -11,3 +11,6 @@ warp = "0.2.3"
 [dev-dependencies]
 bytes = "0.5.4"
 tempfile = "3.1.0"
+
+[build-dependencies]
+git2 = "0.13.6"

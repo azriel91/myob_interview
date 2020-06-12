@@ -7,6 +7,7 @@ use crate::{application::Application, health::Health, health_checker::HealthChec
 mod application;
 mod health;
 mod health_checker;
+mod metadata;
 
 fn hello_world() -> impl Filter<Extract = (&'static str,), Error = Infallible> + Copy {
     warp::any().map(|| "Hello World")
