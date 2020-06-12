@@ -1,5 +1,7 @@
 # Platform Enablement Technical Test
 
+[![CI](https://github.com/azriel91/myob_interview/workflows/CI/badge.svg)](https://github.com/azriel91/myob_interview/actions?query=workflow%3ACI) [![codecov](https://codecov.io/gh/azriel91/myob_interview/branch/master/graph/badge.svg)](https://codecov.io/gh/azriel91/myob_interview)
+
 MYOB [ops technical test] submission.
 
 * "Hello World" endpoint:
