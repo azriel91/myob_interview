@@ -3,11 +3,16 @@ use std::{
     str::FromStr,
 };
 
+/// Server health statuses.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Health {
+    /// Server is running normally.
     Ok,
+    /// Server is running with degraded performance.
     Degraded,
+    /// Server is down.
     Down,
+    /// Server status is unknown.
     Unknown,
 }
 
