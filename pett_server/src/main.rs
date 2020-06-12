@@ -6,6 +6,7 @@ fn hello_world() -> impl Filter<Extract = (&'static str,), Error = Infallible> +
     warp::any().map(|| "Hello World")
 }
 
+#[cfg_attr(tarpaulin, skip)]
 #[tokio::main]
 async fn main() {
     warp::serve(hello_world()).run(([127, 0, 0, 1], 8000)).await;
