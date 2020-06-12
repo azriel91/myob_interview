@@ -8,6 +8,9 @@ use crate::{application::Application, health::Health};
 mod application;
 mod health;
 
+/// Name of the file to read application health from.
+const HEALTH_TXT: &str = "health.txt";
+
 fn hello_world() -> impl Filter<Extract = (&'static str,), Error = Infallible> + Copy {
     warp::any().map(|| "Hello World")
 }
@@ -15,7 +18,7 @@ fn hello_world() -> impl Filter<Extract = (&'static str,), Error = Infallible> +
 fn health_check(
     base_directory: &Path,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    let health_file = Arc::new(base_directory.join("health.txt"));
+    let health_file = Arc::new(base_directory.join(HEALTH_TXT));
 
     warp::path("health")
         .and_then(move || {
@@ -35,10 +38,10 @@ fn health_check(
             let message = format!("{}", health);
 
             match health {
-                Health::Ok | Health::Degraded | Health::Down => {
+                Health::Ok | Health::Degraded => {
                     warp::reply::with_status(message, warp::http::StatusCode::OK)
                 }
-                Health::Unknown => {
+                Health::Down | Health::Unknown => {
                     warp::reply::with_status(message, warp::http::StatusCode::SERVICE_UNAVAILABLE)
                 }
             }
@@ -63,34 +66,157 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(test)]
 mod tests {
-    use tokio::runtime::Runtime;
+    use std::{error::Error, fs::File, io::Write};
 
-    use super::{routes, Application};
+    use bytes::Bytes;
+    use tempfile::TempDir;
+    use tokio::runtime::Runtime;
+    use warp::http::Response;
+
+    use crate::{routes, Health, HEALTH_TXT};
 
     #[test]
-    fn hello_world_endpoint() -> Result<(), Box<dyn std::error::Error>> {
-        let filter = routes(&Application::root_dir()?);
+    fn hello_world_endpoint_returns_200_hello_world() -> Result<(), Box<dyn Error>> {
+        let test_params = TestParams {
+            endpoint: "/",
+            health: Option::<String>::None,
+        };
 
-        let response = Runtime::new()?.block_on(warp::test::request().path("/").reply(&filter));
+        let response = send_request(test_params)?;
+        assert_eq!(response.status(), 200);
+
         let body = String::from_utf8(response.body().to_vec())?;
-
         assert_eq!(body, "Hello World");
 
         Ok(())
     }
 
     #[test]
-    fn health_endpoint_returns_503_unknown_when_no_health_file()
-    -> Result<(), Box<dyn std::error::Error>> {
-        let filter = routes(&Application::root_dir()?);
+    fn health_endpoint_returns_200_ok_when_health_ok() -> Result<(), Box<dyn Error>> {
+        let test_params = TestParams {
+            endpoint: "/health",
+            health: Some(Health::Ok),
+        };
 
-        let response =
-            Runtime::new()?.block_on(warp::test::request().path("/health").reply(&filter));
+        let response = send_request(test_params)?;
+        assert_eq!(response.status(), 200);
+
         let body = String::from_utf8(response.body().to_vec())?;
+        assert_eq!(body, "Ok");
 
+        Ok(())
+    }
+
+    #[test]
+    fn health_endpoint_returns_200_degraded_when_health_degraded() -> Result<(), Box<dyn Error>> {
+        let test_params = TestParams {
+            endpoint: "/health",
+            health: Some(Health::Degraded),
+        };
+
+        let response = send_request(test_params)?;
+        assert_eq!(response.status(), 200);
+
+        let body = String::from_utf8(response.body().to_vec())?;
+        assert_eq!(body, "Degraded");
+
+        Ok(())
+    }
+
+    #[test]
+    fn health_endpoint_returns_503_down_when_health_down() -> Result<(), Box<dyn Error>> {
+        let test_params = TestParams {
+            endpoint: "/health",
+            health: Some(Health::Down),
+        };
+
+        let response = send_request(test_params)?;
         assert_eq!(response.status(), 503);
+
+        let body = String::from_utf8(response.body().to_vec())?;
+        assert_eq!(body, "Down");
+
+        Ok(())
+    }
+
+    #[test]
+    fn health_endpoint_returns_503_unknown_when_no_health_file() -> Result<(), Box<dyn Error>> {
+        let test_params = TestParams {
+            endpoint: "/health",
+            health: Option::<String>::None,
+        };
+
+        let response = send_request(test_params)?;
+        assert_eq!(response.status(), 503);
+
+        let body = String::from_utf8(response.body().to_vec())?;
         assert_eq!(body, "Unknown");
 
         Ok(())
+    }
+
+    #[test]
+    fn health_endpoint_returns_503_unknown_when_health_file_invalid() -> Result<(), Box<dyn Error>>
+    {
+        let test_params = TestParams {
+            endpoint: "/health",
+            health: Some("invalid health"),
+        };
+
+        let response = send_request(test_params)?;
+        assert_eq!(response.status(), 503);
+
+        let body = String::from_utf8(response.body().to_vec())?;
+        assert_eq!(body, "Unknown");
+
+        Ok(())
+    }
+
+    /// Sends a request to the specified endpoint and returns its response.
+    ///
+    /// This abstracts away the boilerplate for a test, so that each test only
+    /// contains the input, execution, and assertion code.
+    fn send_request<T>(test_params: TestParams<T>) -> Result<Response<Bytes>, Box<dyn Error>>
+    where
+        T: ToString,
+    {
+        // Decontruct the variable into fields
+        let TestParams { endpoint, health } = test_params;
+        let temp_dir = setup_base_directory(health)?;
+        let routes = routes(temp_dir.path());
+
+        // Actually send the request
+        let response =
+            Ok(Runtime::new()?.block_on(warp::test::request().path(endpoint).reply(&routes)));
+
+        temp_dir.close()?;
+
+        response
+    }
+
+    /// Returns the temporary directory to use for the test.
+    ///
+    /// If the test needs the health text file to be set up, it is created in
+    /// the temporary directory.
+    fn setup_base_directory<T>(health: Option<T>) -> Result<TempDir, Box<dyn Error>>
+    where
+        T: ToString,
+    {
+        let temp_dir = tempfile::tempdir()?;
+
+        if let Some(health) = health {
+            let health_txt_path = temp_dir.path().join(HEALTH_TXT);
+            let mut file = File::create(&health_txt_path)?;
+            writeln!(file, "{}", health.to_string())?;
+        }
+
+        Ok(temp_dir)
+    }
+
+    struct TestParams<T> {
+        /// Web application endpoint to request, such as "/health"
+        endpoint: &'static str,
+        /// Value to write into `health.txt`.
+        health: Option<T>,
     }
 }

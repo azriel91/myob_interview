@@ -7,3 +7,7 @@ edition = "2018"
 [dependencies]
 tokio = { version = "0.2.21", features = ["fs", "macros", "rt-core"] }
 warp = "0.2.3"
+
+[dev-dependencies]
+bytes = "0.5.4"
+tempfile = "3.1.0"

@@ -13,16 +13,20 @@ impl Application {
             return Ok(PathBuf::from(manifest_dir));
         }
 
-        let mut exe_path = env::current_exe()?;
+        // This section never be called without the environment variable.
+        #[cfg_attr(tarpaulin, skip)]
+        {
+            let mut exe_path = env::current_exe()?;
 
-        // Modify in-place to avoid an extra copy.
-        if exe_path.pop() {
-            return Ok(exe_path);
+            // Modify in-place to avoid an extra copy.
+            if exe_path.pop() {
+                return Ok(exe_path);
+            }
+
+            Err(io::Error::new(
+                io::ErrorKind::Other,
+                "Failed to find an application root",
+            ))
         }
-
-        Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Failed to find an application root",
-        ))
     }
 }
