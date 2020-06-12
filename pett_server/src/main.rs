@@ -1,42 +1,24 @@
-use std::{convert::Infallible, path::Path, sync::Arc};
+use std::{convert::Infallible, path::Path};
 
-use tokio::fs;
 use warp::{Filter, Rejection, Reply};
 
-use crate::{application::Application, health::Health};
+use crate::{application::Application, health::Health, health_checker::HealthChecker};
 
 mod application;
 mod health;
-
-/// Name of the file to read application health from.
-const HEALTH_TXT: &str = "health.txt";
+mod health_checker;
 
 fn hello_world() -> impl Filter<Extract = (&'static str,), Error = Infallible> + Copy {
     warp::any().map(|| "Hello World")
 }
 
 fn health_check(
-    base_directory: &Path,
+    health_checker: HealthChecker,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    let health_file = Arc::new(base_directory.join(HEALTH_TXT));
-
     warp::path("health")
-        .and_then(move || {
-            let health_file = Arc::clone(&health_file);
-            async move {
-                let health_file = health_file.as_path();
-                fs::read(health_file)
-                    .await
-                    .map(|bytes| {
-                        let contents = String::from_utf8_lossy(&bytes);
-                        contents.parse::<Health>().unwrap_or(Health::Unknown)
-                    })
-                    .or_else(|_err| Result::<_, Infallible>::Ok(Health::Unknown))
-            }
-        })
-        .map(|health| {
-            let message = format!("{}", health);
-
+        .and_then(move || health_checker.check())
+        .map(|health: Health| {
+            let message = health.to_string();
             match health {
                 Health::Ok | Health::Degraded => {
                     warp::reply::with_status(message, warp::http::StatusCode::OK)
@@ -51,7 +33,9 @@ fn health_check(
 fn routes(
     base_directory: &Path,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    warp::get().and(health_check(base_directory).or(hello_world()))
+    let health_check = health_check(HealthChecker::new(base_directory));
+
+    warp::get().and(health_check.or(hello_world()))
 }
 
 #[cfg_attr(tarpaulin, skip)]
@@ -73,7 +57,7 @@ mod tests {
     use tokio::runtime::Runtime;
     use warp::http::Response;
 
-    use crate::{routes, Health, HEALTH_TXT};
+    use crate::{health_checker::HEALTH_TXT, routes, Health};
 
     #[test]
     fn hello_world_endpoint_returns_200_hello_world() -> Result<(), Box<dyn Error>> {
