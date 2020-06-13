@@ -1,8 +1,10 @@
 use std::{convert::Infallible, path::Path};
 
-use warp::{Filter, Rejection, Reply};
+use warp::{reply::Json, Filter, Rejection, Reply};
 
-use crate::{application::Application, health::Health, health_checker::HealthChecker};
+use crate::{
+    application::Application, health::Health, health_checker::HealthChecker, metadata::METADATA,
+};
 
 mod application;
 mod health;
@@ -31,12 +33,16 @@ fn health_check(
         })
 }
 
+fn metadata() -> impl Filter<Extract = (Json,), Error = Rejection> + Copy {
+    warp::path("metadata").map(|| warp::reply::json(&METADATA))
+}
+
 fn routes(
     base_directory: &Path,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let health_check = health_check(HealthChecker::new(base_directory));
 
-    warp::get().and(health_check.or(hello_world()))
+    warp::get().and(health_check.or(metadata()).or(hello_world()))
 }
 
 #[cfg_attr(tarpaulin, skip)]
@@ -58,7 +64,7 @@ mod tests {
     use tokio::runtime::Runtime;
     use warp::http::Response;
 
-    use crate::{health_checker::HEALTH_TXT, routes, Health};
+    use crate::{health_checker::HEALTH_TXT, metadata::Metadata, routes, Health};
 
     #[test]
     fn hello_world_endpoint_returns_200_hello_world() -> Result<(), Box<dyn Error>> {
@@ -153,6 +159,27 @@ mod tests {
 
         let body = String::from_utf8(response.body().to_vec())?;
         assert_eq!(body, "Unknown");
+
+        Ok(())
+    }
+
+    #[test]
+    fn metadata_endpoint_returns_200_with_metadata() -> Result<(), Box<dyn Error>> {
+        let test_params = TestParams {
+            endpoint: "/metadata",
+            health: Some(Health::Ok),
+        };
+
+        let response = send_request(test_params)?;
+        assert_eq!(response.status(), 200);
+
+        let metadata = serde_json::from_slice::<'_, Metadata>(response.body())?;
+        assert_eq!(metadata.version, "0.1.0");
+        assert_eq!(
+            metadata.description,
+            "Web application with hello world, health, and metadata endpoints"
+        );
+        assert_eq!(metadata.last_commit_sha, env!("GIT_COMMIT_SHA"));
 
         Ok(())
     }
