@@ -179,7 +179,7 @@ mod tests {
             metadata.description,
             "Web application with hello world, health, and metadata endpoints"
         );
-        assert_eq!(metadata.last_commit_sha, env!("GIT_COMMIT_SHA"));
+        assert_eq!(metadata.last_commit_sha, crate::metadata::GIT_COMMIT_SHA);
 
         Ok(())
     }
