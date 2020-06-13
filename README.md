@@ -42,6 +42,23 @@ The following shows the output when accessing the available endpoints:
     503 Unknown
     ```
 
+* Metadata endpoint:
+
+    ```bash
+    $ curl http://127.0.0.1:8000/metadata -s
+    {"version":"0.1.0","description":"Web application with hello world, health, and metadata endpoints","last_commit_sha":"569311cbb046bcbcafc05b254f78d52c73f24623"}
+    ```
+
+    Formatted:
+
+    ```json
+    {
+      "version": "0.1.0",
+      "description": "Web application with hello world, health, and metadata endpoints",
+      "last_commit_sha": "569311cbb046bcbcafc05b254f78d52c73f24623"
+    }
+    ```
+
 For development instructions, please see the [contribution guide].
 
 [contribution guide]: CONTRIBUTING.md
