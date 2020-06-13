@@ -1,0 +1,133 @@
+on:
+  push: { tags: ['[0-9]+.[0-9]+.[0-9]+'] }
+
+name: Publish
+
+jobs:
+  prepare_artifacts_linux:
+    name: Prepare Artifacts (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Build Application
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      - name: Package Artifacts
+        run: scripts/publish_prepare_app.sh
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: linux-x86_64
+          path: target/publish
+
+  prepare_artifacts_windows:
+    name: Prepare Artifacts (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Prepare symlink configuration
+        run: git config --global core.symlinks true
+
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Build Application
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      - name: Package Artifacts
+        run: powershell -File .\scripts\publish_prepare_app.ps1
+        shell: powershell
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: windows-x86_64
+          path: target/publish
+
+  # We only want to release when both linux and windows artifacts are successfully uploaded.
+  github_release:
+    name: GitHub Release
+    needs:
+      - prepare_artifacts_linux
+      - prepare_artifacts_windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Retrieve Artifacts (Linux)
+        uses: actions/download-artifact@v1
+        with:
+          name: linux-x86_64
+          path: target/publish/linux
+
+      - name: Compress Artifacts (Linux)
+        uses: master-atul/tar-action@v1.0.2
+        id: compress
+        with:
+          command: c
+          cwd: target/publish/linux
+          files: |
+            ./pett_server
+          outPath: target/publish/linux/pett_server.tar.gz
+
+      - name: Retrieve Artifacts (Windows)
+        uses: actions/download-artifact@v1
+        with:
+          name: windows-x86_64
+          path: target/publish/windows
+
+      - name: Compress Artifacts (Windows)
+        uses: montudor/action-zip@v0.1.0
+        with:
+          args: zip -qq -r ./target/publish/windows/pett_server.zip ./target/publish/windows/pett_server
+
+      - id: create_release
+        name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: Please see `README.md` for the current capabilities of the application.
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset (Linux)
+        id: upload_release_asset_linux
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/publish/linux/pett_server.tar.gz
+          asset_name: pett_server.tar.gz
+          asset_content_type: application/tar+gzip
+
+      - name: Upload Release Asset (Windows)
+        id: upload_release_asset_windows
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/publish/windows/pett_server.zip
+          asset_name: pett_server.zip
+          asset_content_type: application/zip
