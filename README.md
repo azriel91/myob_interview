@@ -59,7 +59,14 @@ The following shows the output when accessing the available endpoints:
     }
     ```
 
+### Contributing
+
 For development instructions, please see the [contribution guide].
 
+### Deploying
+
+To deploy the `pett_server`, please see the [deployment guide].
+
 [contribution guide]: CONTRIBUTING.md
+[deployment guide]: DEPLOYING.md
 [ops technical test]: https://github.com/MYOB-Technology/ops-technical-test

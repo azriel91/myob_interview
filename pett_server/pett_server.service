@@ -1,0 +1,14 @@
+[Unit]
+Description=Pett Server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=ubuntu
+ExecStart=/usr/bin/env /home/ubuntu/pett_server
+
+[Install]
+WantedBy=multi-user.target
