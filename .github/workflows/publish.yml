@@ -87,7 +87,7 @@ jobs:
           command: c
           cwd: target/publish/linux
           files: |
-            ./pett_server
+            pett_server
           outPath: target/publish/linux/pett_server.tar.gz
 
       - name: Retrieve Artifacts (Windows)
