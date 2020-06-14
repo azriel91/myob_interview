@@ -174,7 +174,7 @@ mod tests {
         assert_eq!(response.status(), 200);
 
         let metadata = serde_json::from_slice::<'_, Metadata>(response.body())?;
-        assert_eq!(metadata.version, "0.1.0");
+        assert_eq!(metadata.version, env!("CARGO_PKG_VERSION"));
         assert_eq!(
             metadata.description,
             "Web application with hello world, health, and metadata endpoints"
