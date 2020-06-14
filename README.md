@@ -67,6 +67,11 @@ For development instructions, please see the [contribution guide].
 
 To deploy the `pett_server`, please see the [deployment guide].
 
+### Maintenance Report
+
+Information about this project's maintenance status can be found in the [maintenance report].
+
 [contribution guide]: CONTRIBUTING.md
 [deployment guide]: DEPLOYING.md
+[maintenance report]: REPORT.md
 [ops technical test]: https://github.com/MYOB-Technology/ops-technical-test
