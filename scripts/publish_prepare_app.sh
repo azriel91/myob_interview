@@ -54,7 +54,7 @@ trap cleanup EXIT
 
 # First rsync from src to dest, as well as hard link the transferred files to a temporary directory.
 # Then rsync delete from the temporary directory to the intended dest directory.
-rsync -rL --link-dest="${target_publish_app_dir}" "${app_publish_artifacts[@]}" "${target_publish_app_temp_dir}"
-rsync -raL --delete "${target_publish_app_temp_dir}/" "${target_publish_app_dir}"
+rsync -rLE --link-dest="${target_publish_app_dir}" "${app_publish_artifacts[@]}" "${target_publish_app_temp_dir}"
+rsync -raLE --delete "${target_publish_app_temp_dir}/" "${target_publish_app_dir}"
 
 exit 0

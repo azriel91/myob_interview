@@ -46,17 +46,18 @@ The following shows the output when accessing the available endpoints:
 
     ```bash
     $ curl http://127.0.0.1:8000/metadata -s
-    {"version":"0.1.0","description":"Web application with hello world, health, and metadata endpoints","last_commit_sha":"569311cbb046bcbcafc05b254f78d52c73f24623"}
+    {"version":"0.1.1","description":"Web application with hello world, health, and metadata endpoints","last_commit_sha":"c3c69b5db198095c7dd4e975434181a092b761a3"}
     ```
 
     Formatted:
 
     ```json
     {
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Web application with hello world, health, and metadata endpoints",
-      "last_commit_sha": "569311cbb046bcbcafc05b254f78d52c73f24623"
+      "last_commit_sha": "c3c69b5db198095c7dd4e975434181a092b761a3"
     }
+
     ```
 
 ### Contributing
