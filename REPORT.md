@@ -2,15 +2,21 @@
 
 ## Maintenance Status
 
-* **📦 Packaging:** Automated upload to GitHub [releases] on tag ([publish workflow], [package example]).
-* **⚙️ Continuous Integration:** Runs on push to all branches and tags ([CI workflow]).
+* **📦 Packaging:** Automated upload to GitHub releases on tag ([artifacts], [workflow][publish_workflow], [example][publish_example]).
+
+    Includes binaries for:
+
+    - Linux (64-bit)
+    - Windows (64-bit)
+
+* **⚙️ Continuous Integration:** Runs on push to all branches and tags ([workflow][ci_workflow], [example][ci_example]).
 
     Includes:
 
     - Dependency auditing
     - Code formatting
     - Linting
-    - Native builds and testing on Linux and Windows
+    - Native building and testing on Linux and Windows
 
 ## Issues / Opportunities
 
@@ -44,7 +50,8 @@
 
     Adding rate-limiting support with explicit rejection responses provides backpressure to notify requestors to retry later.
 
-[releases]: https://github.com/azriel91/myob_interview/releases
-[CI workflow]: https://github.com/azriel91/myob_interview/blob/master/.github/workflows/ci.yml
-[publish workflow]: https://github.com/azriel91/myob_interview/blob/master/.github/workflows/publish.yml
-[package example]: https://github.com/azriel91/myob_interview/actions/runs/134034447
+[artifacts]: https://github.com/azriel91/myob_interview/releases
+[ci_example]: https://github.com/azriel91/myob_interview/actions/runs/134912478
+[ci_workflow]: https://github.com/azriel91/myob_interview/blob/master/.github/workflows/ci.yml
+[publish_example]: https://github.com/azriel91/myob_interview/actions/runs/134913539
+[publish_workflow]: https://github.com/azriel91/myob_interview/blob/master/.github/workflows/publish.yml
