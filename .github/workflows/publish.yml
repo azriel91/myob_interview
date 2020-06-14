@@ -71,6 +71,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Install Zip
+        run: sudo apt install zip
+
       - name: Retrieve Artifacts (Linux)
         uses: actions/download-artifact@v1
         with:
@@ -94,9 +97,8 @@ jobs:
           path: target/publish/windows
 
       - name: Compress Artifacts (Windows)
-        uses: montudor/action-zip@v0.1.0
-        with:
-          args: zip -qq -r ./target/publish/windows/pett_server.zip ./target/publish/windows/pett_server
+        working-directory: ./target/publish/windows
+        run: zip -qq -r pett_server.zip ./pett_server
 
       - id: create_release
         name: Create GitHub Release
