@@ -81,14 +81,8 @@ jobs:
           path: target/publish/linux
 
       - name: Compress Artifacts (Linux)
-        uses: master-atul/tar-action@v1.0.2
-        id: compress
-        with:
-          command: c
-          cwd: target/publish/linux
-          files: |
-            pett_server
-          outPath: target/publish/linux/pett_server.tar.gz
+        working-directory: target/publish/linux
+        run: tar cfpz pett_server.tar.gz pett_server
 
       - name: Retrieve Artifacts (Windows)
         uses: actions/download-artifact@v1
