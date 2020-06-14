@@ -80,6 +80,12 @@ jobs:
           name: linux-x86_64
           path: target/publish/linux
 
+      # Uploading artifacts makes it lose permissions, so we have to re-mark the binary as executable.
+      # https://github.com/actions/upload-artifact/issues/38
+      - name: Mark Application Executable
+        working-directory: target/publish/linux
+        run: chmod +x ./pett_server/pett_server
+
       - name: Compress Artifacts (Linux)
         working-directory: target/publish/linux
         run: tar cfpz pett_server.tar.gz pett_server
