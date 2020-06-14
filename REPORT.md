@@ -1,5 +1,11 @@
 # Report
 
+## Assumptions
+
+* Web application will be run on a 64-bit Linux or Windows host as a service.
+* Logging is not required at this stage.
+* Feedback of application state is not required at this stage.
+
 ## Maintenance Status
 
 * **📦 Packaging:** Automated upload to GitHub releases on tag ([artifacts], [workflow][publish_workflow], [example][publish_example]).
