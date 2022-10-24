@@ -3,7 +3,7 @@ name = "pett_server"
 version = "0.1.1"
 description = "Web application with hello world, health, and metadata endpoints"
 authors = ["Azriel Hoh <azriel91@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 serde = { version = "1.0.147", features = ["derive"] }
