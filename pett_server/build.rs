@@ -12,7 +12,7 @@ use git2::{Oid, Repository};
 #[derive(Debug)]
 enum BuildError {
     MissingEnvVar(&'static str),
-    RespositoryNotFound(git2::Error),
+    RepositoryNotFound(git2::Error),
     HeadReferenceNotFound(git2::Error),
     CommitNotFound(git2::Error),
 }
@@ -23,7 +23,7 @@ impl Display for BuildError {
             Self::MissingEnvVar(env_var) => {
                 write!(f, "The `{}` environmental variable is not set.", env_var)
             }
-            Self::RespositoryNotFound(git2_error) => {
+            Self::RepositoryNotFound(git2_error) => {
                 write!(f, "The crate repository could not be found: {}", git2_error)
             }
             Self::HeadReferenceNotFound(git2_error) => write!(
@@ -51,8 +51,8 @@ fn content_differs(path: &Path, content: &str) -> Result<bool, Box<dyn Error>> {
 }
 
 fn latest_commit_sha() -> Result<Oid, BuildError> {
-    let repository = Repository::discover(env!("CARGO_MANIFEST_DIR"))
-        .map_err(BuildError::RespositoryNotFound)?;
+    let repository =
+        Repository::discover(env!("CARGO_MANIFEST_DIR")).map_err(BuildError::RepositoryNotFound)?;
     let oid = repository
         .head()
         .map_err(BuildError::HeadReferenceNotFound)?

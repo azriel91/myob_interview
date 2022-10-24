@@ -32,7 +32,7 @@
 
 * Web server port is hard coded.
 
-    In a locked down environment, web applications may be restricted to inbound traffic on certain ports. The web application should take in the port to listen on to accomodate such constraints.
+    In a locked down environment, web applications may be restricted to inbound traffic on certain ports. The web application should take in the port to listen on to accommodate such constraints.
 
     In addition, this disallows running multiple instances of `pett_server` at the same time.
 
