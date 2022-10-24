@@ -114,22 +114,18 @@ jobs:
 
       - name: Upload Release Asset (Linux)
         id: upload_release_asset_linux
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/publish/linux/pett_server.tar.gz
-          asset_name: pett_server.tar.gz
-          asset_content_type: application/tar+gzip
+          files: |
+            ./target/publish/linux/pett_server.tar.gz
 
       - name: Upload Release Asset (Windows)
         id: upload_release_asset_windows
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/publish/windows/pett_server.zip
-          asset_name: pett_server.zip
-          asset_content_type: application/zip
+          files: |
+            ./target/publish/windows/pett_server.zip
