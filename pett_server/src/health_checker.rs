@@ -36,7 +36,7 @@ impl HealthChecker {
                     let contents = String::from_utf8_lossy(&bytes);
                     contents.parse::<Health>().unwrap_or(Health::Unknown)
                 })
-                .or_else(|_err| Result::<_, Infallible>::Ok(Health::Unknown))
+                .or(Result::<_, Infallible>::Ok(Health::Unknown))
         }
     }
 }
