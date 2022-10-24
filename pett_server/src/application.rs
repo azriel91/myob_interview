@@ -8,7 +8,6 @@ impl Application {
     /// During development, this is the crate's directory, read from
     /// `CARGO_MANIFEST_DIR`. In release, this is the directory containing
     /// the executable.
-    #[cfg_attr(tarpaulin, skip)]
     pub(crate) fn root_dir() -> Result<PathBuf, io::Error> {
         if let Some(manifest_dir) = env::var_os("CARGO_MANIFEST_DIR") {
             return Ok(PathBuf::from(manifest_dir));

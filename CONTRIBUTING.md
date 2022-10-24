@@ -10,11 +10,12 @@
     git clone git@github.com:azriel91/myob_interview.git
     ```
 
-4. For code coverage, also install [`cargo-tarpaulin`](https://github.com/xd009642/tarpaulin):
+4. For code coverage, also install [`cargo-llvm-cov`](https://github.com/taiki-e/cargo-llvm-cov) and [`cargo-nextest`](https://github.com/nextest-rs/nextest):
 
     ```bash
-    # Only supported on 64-bit Linux
-    cargo install cargo-tarpaulin
+    rustup component add llvm-tools-preview
+    cargo install cargo-llvm-cov
+    cargo install cargo-nextest
     ```
 
 ## Testing
@@ -25,10 +26,17 @@ Tests are executed by running:
 cargo test
 ```
 
+
+## Coverage
+
 Code coverage is collected by running:
 
 ```bash
-cargo tarpaulin
+cargo coverage
 ```
 
-Coverage is viewable by opening `target/tarpaulin/tarpaulin-report.html`.
+Collect coverage and open `html` report.
+
+```bash
+cargo coverage && cargo coverage_open
+```
