@@ -26,7 +26,7 @@ jobs:
         run: scripts/publish_prepare_app.sh
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: linux-x86_64
           path: target/publish
@@ -57,7 +57,7 @@ jobs:
         shell: powershell
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: windows-x86_64
           path: target/publish
@@ -75,7 +75,7 @@ jobs:
         run: sudo apt install zip
 
       - name: Retrieve Artifacts (Linux)
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: linux-x86_64
           path: target/publish/linux
@@ -91,7 +91,7 @@ jobs:
         run: tar cfpz pett_server.tar.gz pett_server
 
       - name: Retrieve Artifacts (Windows)
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: windows-x86_64
           path: target/publish/windows
