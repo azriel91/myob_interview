@@ -45,7 +45,6 @@ fn routes(
     warp::get().and(health_check.or(metadata()).or(hello_world()))
 }
 
-#[cfg_attr(tarpaulin, skip)]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let base_directory = Application::root_dir()?;

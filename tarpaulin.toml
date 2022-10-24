@@ -1,6 +1,0 @@
-[workspace_default]
-exclude-files = ["build.rs"]
-
-[report]
-out = ["Html", "Xml"]
-output-dir = "target/tarpaulin"
