@@ -21,20 +21,18 @@ impl Display for BuildError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::MissingEnvVar(env_var) => {
-                write!(f, "The `{}` environmental variable is not set.", env_var)
+                write!(f, "The `{env_var}` environmental variable is not set.")
             }
             Self::RepositoryNotFound(git2_error) => {
-                write!(f, "The crate repository could not be found: {}", git2_error)
+                write!(f, "The crate repository could not be found: {git2_error}")
             }
             Self::HeadReferenceNotFound(git2_error) => write!(
                 f,
-                "The repository head reference could not be found: {}",
-                git2_error
+                "The repository head reference could not be found: {git2_error}"
             ),
             Self::CommitNotFound(git2_error) => write!(
                 f,
-                "The repository head commit could not be found: {}",
-                git2_error
+                "The repository head commit could not be found: {git2_error}"
             ),
         }
     }
@@ -81,9 +79,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let metadata_source_content = format!(
         "\
         /// Git repository SHA that this application is published from.\n\
-        pub const GIT_COMMIT_SHA: &str = \"{}\";\n\
-        ",
-        git_commit_sha
+        pub const GIT_COMMIT_SHA: &str = \"{git_commit_sha}\";\n\
+        "
     );
 
     let should_write = if metadata_source_path.exists() {
@@ -94,7 +91,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if should_write {
         let mut file = BufWriter::new(File::create(&metadata_source_path)?);
-        write!(file, "{}", metadata_source_content)?
+        write!(file, "{metadata_source_content}")?
     }
 
     Ok(())

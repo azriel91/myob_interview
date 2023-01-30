@@ -217,7 +217,7 @@ mod tests {
 
         if let Some(health) = health {
             let health_txt_path = temp_dir.path().join(HEALTH_TXT);
-            let mut file = File::create(&health_txt_path)?;
+            let mut file = File::create(health_txt_path)?;
             writeln!(file, "{}", health.to_string())?;
         }
 
