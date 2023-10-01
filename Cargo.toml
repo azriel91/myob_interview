@@ -1,5 +1,6 @@
 [workspace]
 members = ["pett_server"]
+resolver = "2"
 
 [profile.release]
 # Slower compilation, but better performance of final executable.
